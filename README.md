@@ -5,7 +5,7 @@ Aplicativo para marcar os pontos no jogo de truco criado para disciplina de Prog
 Tutorial de criação deste app: http://bit.ly/2MDO6ww
 
 <p align="center">
-    <a href="https://ibb.co/1GGVWs3"><img src="https://i.ibb.co/1GGVWs3/2b2634b6-7466-48e8-b6b6-fc958fdc356f.jpg" alt="2b2634b6-7466-48e8-b6b6-fc958fdc356f" border="0"></a>
+    <img src="https://i.ibb.co/1GGVWs3/2b2634b6-7466-48e8-b6b6-fc958fdc356f.jpg" alt="2b2634b6-7466-48e8-b6b6-fc958fdc356f" border="0"></a>
 </p>
 
 ## Como clonar e importar
