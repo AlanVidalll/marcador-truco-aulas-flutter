@@ -9,40 +9,57 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   var _playerOne = Player(name: "Nós", score: 0, victories: 0);
   var _playerTwo = Player(name: "Eles", score: 0, victories: 0);
-
   @override
   void initState() {
     super.initState();
     _resetPlayers();
-    
   }
 
-  void _resetPlayer({Player player, bool resetVictories = true}) {
+  void _resetTudo({Player player, bool resetVictories = true}) {
     setState(() {
       player.score = 0;
-      if (resetVictories) player.victories = 0;
+      if (resetVictories) {
+        player.victories = 0;
+        _playerOne.name = "Nós";
+        _playerTwo.name = "Eles";
+      }
     });
   }
 
+  void _resetPlayer({Player player, bool resetScores = true}) {
+    setState(() {
+      player.score = 0;
+    });
+  }
+
+  void _resetScore({bool resetScores = true}) {
+    _resetPlayer(player: _playerOne, resetScores: resetScores);
+    _resetPlayer(player: _playerTwo, resetScores: resetScores);
+  }
+
   void _resetPlayers({bool resetVictories = true}) {
-    _resetPlayer(player: _playerOne, resetVictories: resetVictories);
-    _resetPlayer(player: _playerTwo, resetVictories: resetVictories);
+    _resetTudo(player: _playerOne, resetVictories: resetVictories);
+    _resetTudo(player: _playerTwo, resetVictories: resetVictories);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.deepOrange,
-        title: Text("Marcador Pontos (Truco!)"),
+        backgroundColor: Colors.red[900],
+        title: Text(" PLACAR TRUCO"),
         actions: <Widget>[
           IconButton(
             onPressed: () {
-              _showDialog(
+              _showDialogReset(
                   title: 'Zerar',
                   message:
-                      'Tem certeza que deseja começar novamente a pontuação?',
-                  confirm: () {
+                      'Escolaa a opção zerar placar, zerar tudo ou cancelar?',
+                  cancel: () {},
+                  resetPlayer: () {
+                    _resetScore();
+                  },
+                  resetTudo: () {
                     _resetPlayers();
                   });
             },
@@ -50,7 +67,59 @@ class _HomePageState extends State<HomePage> {
           )
         ],
       ),
-      body: Container(padding: EdgeInsets.all(20.0), child: _showPlayers()),
+      body: Container(
+        padding: EdgeInsets.all(20.0),
+        child: _showPlayers(),
+      ),
+    );
+  }
+
+  TextEditingController _nome = TextEditingController();
+
+  void resetFields() {
+    _nome.text = '';
+  }
+
+  Widget _editPlayerName(Player player) {
+    return GestureDetector(
+      onTap: () {
+        showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                  title: Text("Alterar nome"),
+                  content: TextFormField(
+                    decoration: InputDecoration(hintText: "Novo nome"),
+                    controller: _nome,
+                  ),
+                  actions: <Widget>[
+                    FlatButton(
+                      child: Text("Cancelar"),
+                      textColor:  Colors.red[900],
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                    FlatButton(
+                        child: Text("Ok"),
+                        textColor:  Colors.red[900],
+                        onPressed: () {
+                          setState(() {
+                            player.name = _nome.text;
+                            Navigator.of(context).pop();
+                            if (_playerOne.name == '' && _nome.text == '') {
+                              player.name = "Nós";
+                            }
+                            if (_playerTwo.name == '' && _nome.text == '') {
+                              player.name = "eles";
+                            }
+                            resetFields();
+                          });
+                        })
+                  ]);
+            });
+      },
+      child: Container(child: _showPlayerName(player.name)),
     );
   }
 
@@ -61,7 +130,7 @@ class _HomePageState extends State<HomePage> {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
-          _showPlayerName(player.name),
+          _editPlayerName(player),
           _showPlayerScore(player.score),
           _showPlayerVictories(player.victories),
           _showScoreButtons(player),
@@ -86,9 +155,7 @@ class _HomePageState extends State<HomePage> {
     return Text(
       name.toUpperCase(),
       style: TextStyle(
-          fontSize: 22.0,
-          fontWeight: FontWeight.w500,
-          color: Colors.deepOrange),
+          fontSize: 22.0, fontWeight: FontWeight.w500, color: Colors.red[900]),
     );
   }
 
@@ -138,27 +205,32 @@ class _HomePageState extends State<HomePage> {
           color: Colors.black.withOpacity(0.1),
           onTap: () {
             setState(() {
-              player.score--;
+              if (player.score >= 1 && player.score <= 12) player.score--;
             });
           },
         ),
         _buildRoundedButton(
           text: '+1',
-          color: Colors.deepOrangeAccent,
+          color: Colors.red[900],
           onTap: () {
             setState(() {
               player.score++;
             });
 
+            if (_playerOne.score == 11 && _playerTwo.score == 11)
+              _showDialogFerro(
+                title: 'Mão de Ferro',
+                message: 'BOA SORTE',
+              );
+
             if (player.score == 12) {
-              _showDialog(
+              _showDialogGanhou(
                   title: 'Fim do jogo',
                   message: '${player.name} ganhou!',
                   confirm: () {
                     setState(() {
                       player.victories++;
                     });
-
                     _resetPlayers(resetVictories: false);
                   },
                   cancel: () {
@@ -173,10 +245,11 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _showDialog(
+  void _showDialogGanhou(
       {String title, String message, Function confirm, Function cancel}) {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text(title),
@@ -184,6 +257,7 @@ class _HomePageState extends State<HomePage> {
           actions: <Widget>[
             FlatButton(
               child: Text("CANCEL"),
+              textColor: Colors.red[900],
               onPressed: () {
                 Navigator.of(context).pop();
                 if (cancel != null) cancel();
@@ -191,9 +265,77 @@ class _HomePageState extends State<HomePage> {
             ),
             FlatButton(
               child: Text("OK"),
+              textColor: Colors.red[900],
               onPressed: () {
                 Navigator.of(context).pop();
                 if (confirm != null) confirm();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showDialogFerro({String title, String message, Function confirm}) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: <Widget>[
+            FlatButton(
+              child: Text("OK"),
+              textColor: Colors.red[900],
+              onPressed: () {
+                Navigator.of(context).pop();
+                if (confirm != null) confirm();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showDialogReset(
+      {String title,
+      String message,
+      Function cancel,
+      Function resetPlayer,
+      Function resetTudo}) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: <Widget>[
+            FlatButton(
+              child: Text("CANCEL"),
+              textColor: Colors.red[900],
+              onPressed: () {
+                Navigator.of(context).pop();
+                if (cancel != null) cancel();
+              },
+            ),
+            FlatButton(
+              child: Text("PLACAR"),
+              textColor: Colors.red[900],
+              onPressed: () {
+                Navigator.of(context).pop();
+                if (resetPlayer != null) resetPlayer();
+              },
+            ),
+            FlatButton(
+              child: Text("TUDO"),
+              textColor: Colors.red[900],
+              onPressed: () {
+                Navigator.of(context).pop();
+                if (resetTudo != null) resetTudo();
               },
             ),
           ],
