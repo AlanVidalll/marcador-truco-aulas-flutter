@@ -11,7 +11,7 @@ Tutorial de criação deste app: http://bit.ly/2MDO6ww
 
 -   Faça um fork do projeto
 -   Abra o terminal do Visual Studio Code
--   Digite (troque kleberandrade pelo nome do seu usuários): git clone https://github.com/kleberandrade/marcador-truco-aulas-flutter.git marcador_truco
+-   Digite (troque AlanVidalll pelo nome do seu usuários): git clone https://github.com/AlanVidalll/marcador-truco-aulas-flutter.git marcador_truco
 
 ## Desafios
 
